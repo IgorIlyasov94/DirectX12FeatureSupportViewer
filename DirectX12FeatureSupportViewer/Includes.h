@@ -17,6 +17,7 @@
 
 #include <wrl/client.h>
 
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <exception>

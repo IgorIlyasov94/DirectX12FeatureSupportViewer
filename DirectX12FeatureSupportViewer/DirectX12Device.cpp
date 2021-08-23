@@ -7,11 +7,85 @@ DirectX12Device::DirectX12Device()
 	GetHardwareAdapter(factory.Get(), &adapter);
 
 	CreateDevice(adapter.Get(), &device);
+
+	adapter->GetDesc(&adapterDesc);
 }
 
 DirectX12Device::~DirectX12Device()
 {
 
+}
+
+void DirectX12Device::CheckHighestShaderModelSupport(int& majorVersion, int& minorVersion)
+{
+	D3D12_FEATURE_DATA_SHADER_MODEL dataShaderModel{ D3D_SHADER_MODEL_6_6 };
+
+	device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &dataShaderModel, sizeof(dataShaderModel));
+
+	majorVersion = static_cast<int>(dataShaderModel.HighestShaderModel) / 16;
+	minorVersion = static_cast<int>(dataShaderModel.HighestShaderModel) % 16;
+}
+
+void DirectX12Device::CheckBasicFeaturesSupport(bool& doublePrecisionFloatShaderSupport, int& minShaderDataPrecisionBitsSupport, bool& rasterizerOrderViewSupport,
+	int& maxConservativeRasterizationTier)
+{
+	D3D12_FEATURE_DATA_D3D12_OPTIONS dataOptions{};
+
+	device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &dataOptions, sizeof(dataOptions));
+
+	doublePrecisionFloatShaderSupport = dataOptions.DoublePrecisionFloatShaderOps;
+	minShaderDataPrecisionBitsSupport = (dataOptions.MinPrecisionSupport == D3D12_SHADER_MIN_PRECISION_SUPPORT_10_BIT) ? 10 :
+		(dataOptions.MinPrecisionSupport == D3D12_SHADER_MIN_PRECISION_SUPPORT_16_BIT) ? 16 : 32;
+	rasterizerOrderViewSupport = dataOptions.ROVsSupported;
+	maxConservativeRasterizationTier = static_cast<int>(dataOptions.ConservativeRasterizationTier);
+}
+
+void DirectX12Device::CheckRaytracingSupport(int& majorVersion, int& minorVersion)
+{
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 dataOptions{};
+
+	device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &dataOptions, sizeof(dataOptions));
+
+	majorVersion = dataOptions.RaytracingTier / 10;
+	minorVersion = dataOptions.RaytracingTier % 10;
+}
+
+void DirectX12Device::CheckVariableShadingRate(int& maxVariableShadingRateTier)
+{
+	D3D12_FEATURE_DATA_D3D12_OPTIONS6 dataOptions{};
+
+	device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &dataOptions, sizeof(dataOptions));
+
+	maxVariableShadingRateTier = dataOptions.VariableShadingRateTier;
+}
+
+bool DirectX12Device::CheckMeshAndAmplificationShadersSupport()
+{
+	D3D12_FEATURE_DATA_D3D12_OPTIONS7 dataOptions{};
+
+	device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &dataOptions, sizeof(dataOptions));
+
+	return dataOptions.MeshShaderTier == D3D12_MESH_SHADER_TIER_1;
+}
+
+std::wstring DirectX12Device::GetAdapterDescription()
+{
+	return adapterDesc.Description;
+}
+
+SIZE_T DirectX12Device::GetDedicatedVideoMemory()
+{
+	return adapterDesc.DedicatedVideoMemory;
+}
+
+SIZE_T DirectX12Device::GetDedicatedSystemMemory()
+{
+	return adapterDesc.DedicatedSystemMemory;
+}
+
+SIZE_T DirectX12Device::GetSharedSystemMemory()
+{
+	return adapterDesc.SharedSystemMemory;
 }
 
 void DirectX12Device::GetHardwareAdapter(IDXGIFactory4* _factory, IDXGIAdapter1** _adapter)
