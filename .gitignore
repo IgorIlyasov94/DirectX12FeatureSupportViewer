@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/DirectX12FeatureSupportViewer/x64/Debug
+/DirectX12FeatureSupportViewer/DirectX12FeatureSupportViewer.vcxproj.user
+/DirectX12FeatureSupportViewer/.vs/DirectX12FeatureSupportViewer/v16
+/.vs
