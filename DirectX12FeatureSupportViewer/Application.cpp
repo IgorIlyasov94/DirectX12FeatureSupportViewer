@@ -92,6 +92,8 @@ int Application::Run()
 			std::cout << "supported" << std::endl;
 		else
 			std::cout << "is not supported" << std::endl;
+
+		std::cin.get();
 	}
 	catch (std::exception& e)
 	{
